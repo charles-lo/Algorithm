@@ -13,16 +13,13 @@ class InfixEvaluator {
     }
 
     private static Stack<Double> operandStack = new Stack<>();
-
     private static Stack<String> operatorStack = new Stack<>();
-
 
     private static final String OPERATORS = "+-/*%^()[]{}";
     private static final String NONBRACES = "+-/*%^";
     private static final int[] PRECEDENCE = {1, 1, 2, 2, 3, 3, -1, -1, -1, -1, -1, -1};
 
     static ArrayList<String> input = new ArrayList<>();
-
 
     private static ArrayList<String> inputCleaner(String postfix) {
         StringBuilder sb = new StringBuilder();
@@ -155,7 +152,9 @@ class InfixEvaluator {
             } else {
                 //Pop all stacked operators with equal
                 // or higher precedence than op.
-                boolean handle = false;
+                if (operandStack.size() < 2) {
+                    throw new IllegalArgumentException("argument error");
+                }
 
                 while (operandStack.size() >= 2 && !operatorStack.isEmpty()) {
                     double r = operandStack.pop();
@@ -168,15 +167,7 @@ class InfixEvaluator {
                         //reset topOp
                         topOp = operatorStack.peek();
                     }
-                    handle = true;
                 }
-                if (operatorStack.size() < 2) {
-                    handle = true;
-                }
-                if (!handle) {
-                    throw new IllegalArgumentException("argument error");
-                }
-
                 //assert: Operator stack is empty or
                 // current operator precedence > top of stack operator precedence.
                 operatorStack.push(op);
@@ -193,7 +184,9 @@ class InfixEvaluator {
                 processOperator(expression);
             }
         }
-        boolean handle = false;
+        if (operandStack.size() < 2) {
+            throw new IllegalArgumentException("argument error");
+        }
         while (operandStack.size() >= 2 && !operatorStack.isEmpty()) {
 
             double r = operandStack.pop();
@@ -201,13 +194,6 @@ class InfixEvaluator {
             String work = getNextNonBracerOperator();
 
             doOperandWork(work, l, r);
-            handle = true;
-        }
-        if (operatorStack.size() < 2) {
-            handle = true;
-        }
-        if (!handle) {
-            throw new IllegalArgumentException("argument error");
         }
         if (operandStack.isEmpty())
             return null;
@@ -217,7 +203,7 @@ class InfixEvaluator {
 
     private static String getNextNonBracerOperator() {
         String work = "\0"; // \0 is null,
-        while (!operatorStack.isEmpty() && NONBRACES.indexOf(work) == -1)
+        while (!operatorStack.isEmpty() && !NONBRACES.contains(work))
             work = operatorStack.pop();
         return work;
     }
